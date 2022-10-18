@@ -1,0 +1,97 @@
+version: 2
+
+sources:
+  - name: googleads_raw
+    schema: googleads_raw
+    freshness:
+        warn_after: {count: 2, period: hour}
+    loaded_at_field: _fivetran_synced
+    tables:
+      - name: accounts
+        identifier: account_history
+      - name: campaigns
+        identifier: campaign_history
+      - name: campaign_performance_report
+      - name: campaign_convtype_performance_report
+      - name: ad_groups
+        identifier: ad_group_history
+      - name: ads
+        identifier: ad_history
+      - name: ad_performance_report
+      - name: ad_convtype_performance_report
+      - name: keywords
+        identifier: ad_group_criterion_history
+      - name: keyword_performance_report
+      - name: keyword_convtype_performance_report
+      - name: search_term_performance_report
+      - name: search_term_convtype_performance_report
+      - name: shopping_performance_report
+      - name: shopping_convtype_performance_report
+
+models:
+  - name: googleads_accounts
+    columns: 
+      - name: account_id
+        tests:
+          - unique
+          - not_null
+  - name: googleads_campaigns
+    columns: 
+      - name: campaign_id
+        tests:
+          - unique
+          - not_null
+  - name: _stg_googleads_campaigns_insights 
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
+          - not_null
+  - name: googleads_ad_groups
+    columns: 
+      - name: ad_group_id
+        tests:
+          - unique
+          - not_null
+  - name: googleads_ads
+    columns: 
+      - name: unique_key
+        tests:
+          - unique
+          - not_null
+  - name: _stg_googleads_ads_insights 
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
+          - not_null
+  - name: googleads_keywords
+    columns: 
+      - name: unique_key
+        tests:
+          - unique
+          - not_null
+  - name: _stg_googleads_keywords_insights
+    columns: 
+      - name: unique_key
+        tests:
+          - unique
+          - not_null 
+  - name: _stg_googleads_searchterms_insights 
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
+          - not_null
+  - name: googleads_shopping_products
+    columns: 
+      - name: unique_key
+        tests:
+          - unique
+          - not_null
+  - name: _stg_googleads_shopping_insights 
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
+          - not_null

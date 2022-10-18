@@ -1,0 +1,3 @@
+packages:
+  - git: "https://github.com/superbolt-x/bolt-dbt-utils.git"
+    revision: master
