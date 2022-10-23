@@ -17,6 +17,12 @@ sources:
         identifier: ad_group_history
       - name: ads
         identifier: ad_history
+      - name: expanded_text_ads
+        identifier: expanded_text_ad_history
+      - name: expanded_dynamic_search_ads
+        identifier: expanded_dynamic_search_ad_history
+      - name: gmail_ads
+        identifier: gmail_ad_history
       - name: ad_performance_report
       - name: ad_convtype_performance_report
       - name: keywords
@@ -47,6 +53,11 @@ models:
         tests: 
           - unique
           - not_null
+  - name: googleads_performance_by_campaign
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
   - name: googleads_ad_groups
     columns: 
       - name: ad_group_id
@@ -65,6 +76,11 @@ models:
         tests: 
           - unique
           - not_null
+  - name: googleads_performance_by_ad
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
   - name: googleads_keywords
     columns: 
       - name: unique_key
@@ -77,12 +93,22 @@ models:
         tests:
           - unique
           - not_null 
+  - name: googleads_performance_by_keyword
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
   - name: _stg_googleads_searchterms_insights 
     columns:
       - name: unique_key
         tests: 
           - unique
           - not_null
+  - name: googleads_performance_by_searchterm
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
   - name: googleads_shopping_products
     columns: 
       - name: unique_key
@@ -95,3 +121,8 @@ models:
         tests: 
           - unique
           - not_null
+  - name: googleads_performance_by_shopping_product
+    columns:
+      - name: unique_key
+        tests: 
+          - unique

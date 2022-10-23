@@ -1,3 +1,8 @@
+{{ config( 
+        materialized='incremental',
+        unique_key='unique_key'
+) }}
+
 {%- set currency_fields = [
     "spend"
 ]
@@ -13,7 +18,9 @@
     "campaign_name",
     "interactions",
     "engagements",
-    "ad_group_name"
+    "ad_group_id",
+    "ad_group_name",
+    "info_text"
 ]
 -%}
 
@@ -48,35 +55,17 @@ WITH
     {%- if var('currency') != 'USD' %}
     LEFT JOIN currency USING(date)
     {%- endif %}
-    ),
+    {% if is_incremental() -%}
 
-    ad_groups AS 
-    (SELECT campaign_id, ad_group_id, ad_group_name, ad_group_status
-    FROM {{ ref('googleads_ad_groups') }}
-    ),
+    where date >= (select max(date)-30 from {{ this }})
 
-    campaigns AS 
-    (SELECT account_id, campaign_id, campaign_name, campaign_status
-    FROM {{ ref('googleads_campaigns') }}
-    ),
-
-    accounts AS 
-    (SELECT account_id, account_name, account_currency_code
-    FROM {{ ref('googleads_accounts') }}
-    ),
-
-    keywords AS 
-    (SELECT *,
-        'customers/'||account_id::varchar||'/adGroupCriteria/'||ad_group_id::varchar||'~'||keyword_id::varchar as keyword_ad_group_criterion
-    FROM {{ ref('googleads_keywords') }}
-    LEFT JOIN ad_groups USING(ad_group_id)
-    LEFT JOIN campaigns USING(campaign_id)
-    LEFT JOIN accounts USING(account_id)
+    {% endif %}
     )
 
-SELECT *
+SELECT *,
+    keyword_ad_group_criterion||'_'||search_term||'_'||search_term_match_type||'_'||date as unique_key,
+    {{ get_date_parts('date') }}
 FROM insights 
-LEFT JOIN keywords USING(ad_group_id, keyword_ad_group_criterion)
 
 
 

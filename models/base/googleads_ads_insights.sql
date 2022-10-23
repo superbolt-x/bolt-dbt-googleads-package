@@ -11,16 +11,19 @@
     "customer_currency_code",
     "campaign_id",
     "campaign_name",
-    "ad_group_id",
     "ad_group_name",
     "ad_status",
     "ad_strength",
+    "ad_type",
     "ad_device_preference",
     "ad_added_by_google_ads",
+    "ad_final_urls",
     "active_view_measurable_cost_micros",
     "engagements",
     "interactions",
     "bounce_rate",
+    "gmail_ad_marketing_image_headline",
+    "gmail_ad_marketing_image_description",
     "gmail_forwards",
     "gmail_saves",
     "gmail_secondary_clicks",
@@ -28,17 +31,23 @@
     "ad_display_url",
     "call_ad_description_1",
     "call_ad_description_2",
+    "responsive_search_ad_headlines",
     "responsive_search_ad_descriptions",
+    "responsive_display_ad_headlines",
     "responsive_display_ad_descriptions",
     "expanded_dynamic_search_ad_description",
     "expanded_text_ad_description",
     "expanded_text_ad_description_2",
     "expanded_text_ad_path_1",
     "expanded_text_ad_path_2",
+    "expanded_text_ad_headline_part_1",
+    "expanded_text_ad_headline_part_2",
+    "expanded_text_ad_headline_part_3",
     "legacy_responsive_display_ad_short_headline",
     "legacy_responsive_display_ad_long_headline",
     "legacy_responsive_display_ad_call_to_action_text",
     "legacy_responsive_display_ad_description",
+    "text_ad_headline",
     "text_ad_description_1",
     "ad_text_ad_description_2",
     "ad_responsive_display_ad_long_headline"
@@ -76,33 +85,11 @@ WITH
     {%- if var('currency') != 'USD' %}
     LEFT JOIN currency USING(date)
     {%- endif %}
-    ),
-
-    ads AS 
-    (SELECT ad_group_id, ad_id, ad_name, ad_status
-    FROM {{ ref('googleads_ads') }}
-    ),
-
-    ad_groups AS 
-    (SELECT campaign_id, ad_group_id, ad_group_name, ad_group_status
-    FROM {{ ref('googleads_ad_groups') }}
-    ),
-
-    campaigns AS 
-    (SELECT account_id, campaign_id, campaign_name, campaign_status
-    FROM {{ ref('googleads_campaigns') }}
-    ),
-
-    accounts AS 
-    (SELECT account_id, account_name, account_currency_code
-    FROM {{ ref('googleads_accounts') }}
     )
 
-SELECT *
+    
+SELECT *,
+    {{ get_date_parts('date') }}
 FROM insights 
-LEFT JOIN ads USING(ad_id)
-LEFT JOIN ad_groups USING(ad_group_id)
-LEFT JOIN campaigns USING(campaign_id)
-LEFT JOIN accounts USING(account_id)
 
 

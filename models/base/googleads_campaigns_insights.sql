@@ -5,7 +5,7 @@
 
 {%- set exclude_fields = [
     "unique_key",
-    "customer_id",
+    "account_id",
     "customer_currency_code",
     "campaign_name",
     "account_name",
@@ -64,21 +64,10 @@ WITH
     {%- if var('currency') != 'USD' %}
     LEFT JOIN currency USING(date)
     {%- endif %}
-    ),
-
-    campaigns AS 
-    (SELECT account_id, campaign_id, campaign_name, campaign_status
-    FROM {{ ref('googleads_campaigns') }}
-    ),
-
-    accounts AS 
-    (SELECT account_id, account_name, account_currency_code
-    FROM {{ ref('googleads_accounts') }}
     )
 
-SELECT *
+SELECT *,
+    {{ get_date_parts('date') }}
 FROM insights 
-LEFT JOIN campaigns USING(account_id, campaign_id)
-LEFT JOIN accounts USING(account_id)
 
 

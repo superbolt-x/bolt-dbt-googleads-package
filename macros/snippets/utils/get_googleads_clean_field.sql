@@ -5,6 +5,9 @@
     {%- if column_name == 'customer_id' -%}
         {{column_name}} as account_id
 
+    {%- elif column_name == 'customer_currency_code' -%}
+        {{column_name}} as account_currency_code
+
     {%- elif column_name in ("customer_descriptive_name","descriptive_name") -%}
         {{column_name}} as account_name
 
@@ -55,6 +58,9 @@
         {%- if column_name in ("id","name","status","final_urls") -%}
         {{column_name}} as ad_{{column_name}}
 
+        {%- elif table_name == "expanded_text_ads" and "headline_part" in column_name -%}
+        {{column_name}} as expanded_text_ad_{{column_name}}
+
         {%- else -%}
         {{column_name}}
         
@@ -79,13 +85,10 @@
         
         {%- endif -%}
 
-    {%- elif 'search_query_performance' in table_name -%}
+    {%- elif 'search_term_performance' in table_name -%}
 
-        {%- if column_name == 'keyword' -%}
-        {{column_name}}::varchar as keyword_name
-
-        {%- elif column_name == 'search_term_view_search_term' -%}
-        {{column_name}} as search_term
+        {%- if column_name == 'status' -%}
+        {{column_name}} as search_term_status
 
         {%- else -%}
         {{column_name}}

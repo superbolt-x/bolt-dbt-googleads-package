@@ -48,33 +48,11 @@ WITH
     {%- if var('currency') != 'USD' %}
     LEFT JOIN currency USING(date)
     {%- endif %}
-    ),
-
-    products AS 
-    (SELECT ad_group_id, product_item_id, product_title, product_type_l_1 as product_type
-    FROM {{ ref('googleads_shopping_products') }}
-    ),
-
-    ad_groups AS 
-    (SELECT campaign_id, ad_group_id, ad_group_name, ad_group_status
-    FROM {{ ref('googleads_ad_groups') }}
-    ),
-
-    campaigns AS 
-    (SELECT account_id, campaign_id, campaign_name, campaign_status
-    FROM {{ ref('googleads_campaigns') }}
-    ),
-
-    accounts AS 
-    (SELECT account_id, account_name, account_currency_code
-    FROM {{ ref('googleads_accounts') }}
     )
 
-SELECT *
+SELECT *,
+    {{ get_date_parts('date') }}
 FROM insights 
-LEFT JOIN products USING(ad_group_id, product_item_id)
-LEFT JOIN ad_groups USING(ad_group_id)
-LEFT JOIN campaigns USING(campaign_id)
-LEFT JOIN accounts USING(account_id)
+
 
 
