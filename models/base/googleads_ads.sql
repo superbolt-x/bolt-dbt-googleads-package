@@ -40,42 +40,44 @@
         'gmail_ads' -%}
 
 WITH ads AS 
-    (SELECT
-    
-        {% for field in ad_selected_fields -%}
-        {{ get_googleads_clean_field(ad_table_name, field) }},
+    (SELECT 
+        {% for field in ad_selected_fields|reject("eq","updated_at") -%}
+        {{ get_googleads_clean_field(ad_table_name, field) }}
+        {%- if not loop.last %},{%- endif %}
         {% endfor -%}
-        MAX(updated_at) OVER (PARTITION BY ad_group_id, id) as last_updated_at
+    FROM 
+        (SELECT
+            {{ ad_selected_fields|join(", ") }},
+            MAX(updated_at) OVER (PARTITION BY ad_group_id, id) as last_updated_at
 
-    FROM {{ source(schema_name, ad_table_name) }}
-    ),
-
-    expanded_text_ads AS 
-    (SELECT
-    
-        {% for field in expanded_text_ad_selected_fields -%}
-        {{ get_googleads_clean_field(expanded_text_ad_table_name, field) }},
-        {% endfor -%}
-        MAX(updated_at) OVER (PARTITION BY ad_group_id, ad_id) as last_updated_at
-
-    FROM {{ source(schema_name, expanded_text_ad_table_name) }}
+        FROM {{ source(schema_name, ad_table_name) }})
+    WHERE updated_at = last_updated_at
     )
 
-SELECT 
-    ad_group_id,
-    ad_id, 
-    ad_name,
-    ad_status,
-    ad_final_urls,
-    expanded_text_ad_headline_part_1,
-    expanded_text_ad_headline_part_2,
-    expanded_text_ad_headline_part_3,
+    {%- set expanded_text_table_exists = check_source_exists(schema_name,expanded_text_ad_table_name) %}
+    {%- if expanded_text_table_exists %}
+
+    ,expanded_text_ads AS 
+    (SELECT 
+        {% for field in expanded_text_ad_selected_fields|reject("eq","updated_at") -%}
+        {{ get_googleads_clean_field(expanded_text_ad_table_name, field) }}
+        {%- if not loop.last %},{%- endif %}
+        {% endfor -%}
+    FROM 
+        (
+        SELECT
+            {{ expanded_text_ad_selected_fields|join(", ") }},
+            MAX(updated_at) OVER (PARTITION BY ad_group_id, ad_id) as last_updated_at
+        FROM {{ source(schema_name, expanded_text_ad_table_name) }}
+        )
+    WHERE updated_at = last_updated_at
+    )
+
+    {%- endif %}
+
+SELECT *,
     ad_group_id||'_'||ad_id as unique_key
-FROM 
-    (SELECT *
-    FROM ads 
-    WHERE updated_at = last_updated_at) 
-LEFT JOIN 
-    (SELECT * 
-    FROM expanded_text_ads
-    WHERE updated_at = last_updated_at) USING(ad_group_id, ad_id) 
+FROM ads
+{%- if expanded_text_table_exists %}
+LEFT JOIN expanded_text_ads USING(ad_group_id, ad_id) 
+{%- endif %}

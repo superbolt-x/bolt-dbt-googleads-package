@@ -2,7 +2,7 @@
 
     {%- call statement('results', fetch_result=True) -%}
 
-    SELECT TRANSLATE(lower('{{conversion_name}}'),'().&- !:/+|','')
+    SELECT TRANSLATE(lower('{{conversion_name}}'),'().&- !:/+|<>','')
 
     {%- endcall -%}
 

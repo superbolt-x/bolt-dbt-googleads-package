@@ -37,17 +37,17 @@ WITH
     ),
 
     ad_groups AS 
-    (SELECT campaign_id, ad_group_id, ad_group_name, ad_group_status
+    (SELECT {{ dbt_utils.star(from = ref('googleads_ad_groups'), except = ["unique_key"]) }}
     FROM {{ ref('googleads_ad_groups') }}
     ),
 
     campaigns AS 
-    (SELECT account_id, campaign_id, campaign_name, campaign_status
+    (SELECT {{ dbt_utils.star(from = ref('googleads_campaigns'), except = ["unique_key"]) }}
     FROM {{ ref('googleads_campaigns') }}
     ),
 
     accounts AS 
-    (SELECT account_id, account_name, account_currency_code
+    (SELECT {{ dbt_utils.star(from = ref('googleads_accounts'), except = ["unique_key"]) }}
     FROM {{ ref('googleads_accounts') }}
     )
 

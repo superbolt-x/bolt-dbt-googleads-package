@@ -37,13 +37,13 @@ sources:
 models:
   - name: googleads_accounts
     columns: 
-      - name: account_id
+      - name: unique_key
         tests:
           - unique
           - not_null
   - name: googleads_campaigns
     columns: 
-      - name: campaign_id
+      - name: unique_key
         tests:
           - unique
           - not_null
@@ -60,7 +60,7 @@ models:
           - unique
   - name: googleads_ad_groups
     columns: 
-      - name: ad_group_id
+      - name: unique_key
         tests:
           - unique
           - not_null
