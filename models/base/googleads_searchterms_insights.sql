@@ -13,7 +13,7 @@
     "_fivetran_synced",
     "account_id",
     "account_name",
-    "customer_currency_code",
+    "account_currency_code",
     "campaign_id",
     "campaign_name",
     "interactions",

@@ -27,7 +27,8 @@ WITH
         {%- if not loop.last %},{%- endif %}
         {% endfor %}
     FROM {{ ref('googleads_keywords_insights') }}
-    GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}),
+    GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}
+    ),
     {%- endfor %}
 
     keywords AS 

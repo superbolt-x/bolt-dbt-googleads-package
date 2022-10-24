@@ -4,7 +4,7 @@
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
 {%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
-{%- set dimensions = ['keyword_ad_group_criterion','search_term','search_term_match_type','status'] -%}
+{%- set dimensions = ['keyword_ad_group_criterion','search_term','search_term_match_type','search_term_status'] -%}
 {%- set measures = adapter.get_columns_in_relation(ref('googleads_searchterms_insights'))
                     |map(attribute="name")
                     |reject("in",exclude_fields)
@@ -27,7 +27,8 @@ WITH
         {%- if not loop.last %},{%- endif %}
         {% endfor %}
     FROM {{ ref('googleads_searchterms_insights') }}
-    GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}),
+    GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}
+    ),
     {%- endfor %}
 
     ad_groups AS 
