@@ -45,7 +45,7 @@ models:
       googleads_searchterms_insights:
         +enabled: false
       _stg_googleads_shopping_insights:
-        +enabled: falses
+        +enabled: false
       googleads_shopping_insights:
         +enabled: false
 
