@@ -11,7 +11,6 @@
     "account_name",
     "campaign_status",
     "advertising_channel_type",
-    "engagements",
     "gmail_saves",
     "gmail_forwards",
     "gmail_secondary_clicks",
