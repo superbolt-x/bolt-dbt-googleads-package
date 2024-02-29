@@ -21,7 +21,7 @@ WITH
         {{date_granularity}} as date,
         {%- for dimension in dimensions %}
         {%- if dimension == 'keyword_id' %}
-        split_part(keyword_id,'~',2)::INTEGER as keyword_id,
+        split_part(keyword_id,'~',2)::VARCHAR as keyword_id,
         {%- else %}
         {{ dimension }},
         {%- endif %}
@@ -41,7 +41,7 @@ WITH
     ),
 
     keywords AS 
-    (SELECT {{ dbt_utils.star(from = ref('googleads_keywords'), except = ["unique_key"]) }}
+    (SELECT  ad_group_id, keyword_id::VARCHAR as keyword_id, keyword_text, keyword_match_type, keyword_status, keyword_negative
     FROM {{ ref('googleads_keywords') }}
     ),
 
