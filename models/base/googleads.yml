@@ -29,6 +29,8 @@ sources:
         identifier: ad_group_criterion_history
       - name: keyword_performance_report
       - name: keyword_convtype_performance_report
+      - name: keyword_ad_performance_report
+      - name: keyword_ad_convtype_performance_report
       - name: search_term_performance_report
       - name: search_term_convtype_performance_report
       - name: shopping_performance_report
