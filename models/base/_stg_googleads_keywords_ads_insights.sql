@@ -53,13 +53,14 @@ WITH insights AS
         ad_group_id,
         ad_id,
         keyword_ad_group_criterion as keyword_id,
+        search_term,
         {% for conversion in conversions -%}
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }} ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}",
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }}_value ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}_value"
         {%- if not loop.last %},{%- endif %}
         {% endfor %}
     FROM convtype_raw
-    GROUP BY 1,2,3,4  
+    GROUP BY 1,2,3,4,5  
     )
     {%- endif %}
 
