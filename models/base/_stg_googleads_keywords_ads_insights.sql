@@ -8,8 +8,7 @@
 {%- set insights_exclude_fields = [
    "_fivetran_id",
    "day_of_week",
-   "customer_time_zone",
-   "percent_new_visitors",
+   "customer_time_zone"
 ]
 -%}
 {%- set convtype_include_fields = [
