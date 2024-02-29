@@ -68,7 +68,7 @@
 
     {%- elif 'keyword' in table_name -%}
 
-        {%- if column_name in ("id","ad_group_criterion_criterion_id") -%}
+        {%- if column_name in ("id","ad_group_criterion_criterion_id","keyword_ad_group_criterion") -%}
         {{column_name}} as keyword_id
 
         {%- elif column_name == 'cpc_bid_micros' -%}
@@ -79,6 +79,12 @@
 
         {%- elif column_name == "negative" -%}
         {{column_name}} as keyword_{{column_name}}
+
+        {%- elif column_name == "info_text" -%}
+        {{column_name}} as keyword_text
+
+        {%- elif column_name == "info_match_type" -%}
+        {{column_name}} as keyword_match_type
 
         {%- else -%}
         {{column_name}}
