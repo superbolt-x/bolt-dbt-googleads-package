@@ -70,7 +70,7 @@ SELECT *,
     ad_group_id||'_'||ad_id||'_'||keyword_id||'_'||date as unique_key
 FROM insights
 {%- if convtype_table_exists %}
-LEFT JOIN convtype USING(date, ad_group_id,   ad_id, keyword_id)
+LEFT JOIN convtype USING(date,ad_group_id,ad_id,keyword_id)
 {%- endif %}
 {% if is_incremental() -%}
 
