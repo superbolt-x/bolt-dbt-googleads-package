@@ -66,7 +66,7 @@
         
         {%- endif -%}
 
-    {%- elif 'keyword' in table_name -%}
+    {%- elif "keyword" in table_name -%}
 
         {%- if column_name in ("id","ad_group_criterion_criterion_id","keyword_ad_group_criterion") -%}
         {{column_name}} as keyword_id
