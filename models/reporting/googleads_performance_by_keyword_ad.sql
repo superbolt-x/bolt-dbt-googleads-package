@@ -41,7 +41,7 @@ WITH
     ),
 
     keywords AS 
-    (SELECT {{ dbt_utils.star(from = ref('googleads_ad_groups'), except = ["unique_key"]) }}
+    (SELECT {{ dbt_utils.star(from = ref('googleads_keywords'), except = ["unique_key"]) }}
     FROM {{ ref('googleads_keywords') }}
     ),
 
