@@ -41,7 +41,7 @@ WITH
     ),
 
     keywords AS 
-    (SELECT keyword_id, keyword_text, keyword_match_type, keyword_status, keyword_negative
+    (SELECT {{ dbt_utils.star(from = ref('googleads_ad_groups'), except = ["unique_key"]) }}
     FROM {{ ref('googleads_keywords') }}
     ),
 
@@ -73,8 +73,8 @@ FROM
     {%- endfor %}
     )
 
-LEFT JOIN ads USING(ad_id)
-LEFT JOIN keywords USING(keyword_id)
+LEFT JOIN ads USING(ad_group_id,ad_id)
+LEFT JOIN keywords USING(ad_group_id,keyword_id)
 LEFT JOIN ad_groups USING(ad_group_id)
 LEFT JOIN campaigns USING(campaign_id)
 LEFT JOIN accounts USING(account_id)
