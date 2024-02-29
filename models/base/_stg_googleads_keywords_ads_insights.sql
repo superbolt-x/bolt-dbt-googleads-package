@@ -31,9 +31,9 @@
 WITH insights AS 
     (SELECT 
         {%- for field in insights_fields %}
-        {{ get_googleads_clean_field(insights_table_name, field) }}
-        {%- if not loop.last %},{%- endif %}
+        {{ get_googleads_clean_field(insights_table_name, field) }},
         {%- endfor %}
+        keyword_ad_group_criterion as keyword_id
     FROM {{ source(schema_name, insights_table_name) }}
     )
 
