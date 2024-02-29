@@ -16,6 +16,7 @@
     "ad_group_id",
     "ad_id",
     "keyword_ad_group_criterion",
+    "search_term",
     "conversion_action_name",
     "conversions",
     "conversions_value"
@@ -64,10 +65,10 @@ WITH insights AS
 
 SELECT *,
     MAX(_fivetran_synced) over (PARTITION BY account_id) as last_updated,
-    ad_group_id||'_'||ad_id||'_'||keyword_id||'_'||date as unique_key
+    ad_group_id||'_'||ad_id||'_'||keyword_id||'_'||search_term||'_'||date as unique_key
 FROM insights
 {%- if convtype_table_exists %}
-LEFT JOIN convtype USING(date,ad_group_id,ad_id,keyword_id)
+LEFT JOIN convtype USING(date,ad_group_id,ad_id,keyword_id,search_term)
 {%- endif %}
 {% if is_incremental() -%}
 
