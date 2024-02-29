@@ -20,7 +20,11 @@ WITH
         '{{date_granularity}}' as date_granularity,
         {{date_granularity}} as date,
         {%- for dimension in dimensions %}
+        {%- if dimension == 'keyword_id' %}
+        split_part(keyword_id,'~',2)::INTEGER as keyword_id,
+        {%- else %}
         {{ dimension }},
+        {%- endif %}
         {%-  endfor %}
         {% for measure in measures -%}
         COALESCE(SUM("{{ measure }}"),0) as "{{ measure }}"
