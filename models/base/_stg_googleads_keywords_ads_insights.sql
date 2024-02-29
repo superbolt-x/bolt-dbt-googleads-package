@@ -19,9 +19,7 @@
     "keyword_ad_group_criterion",
     "conversion_action_name",
     "conversions",
-    "conversions_value",
-    "all_conversions",
-    "all_conversions_value"
+    "conversions_value"
 ]
 -%}
 
