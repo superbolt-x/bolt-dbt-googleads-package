@@ -41,7 +41,7 @@ WITH
     ),
 
     keywords AS 
-    (SELECT ad_group_id, keyword_id, keyword_text, keyword_match_type, keyword_status, keyword_negative
+    (SELECT keyword_id, keyword_text, keyword_match_type, keyword_status, keyword_negative
     FROM {{ ref('googleads_keywords') }}
     ),
 
