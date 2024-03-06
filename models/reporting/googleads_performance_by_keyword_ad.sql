@@ -4,7 +4,7 @@
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
 {%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
-{%- set dimensions = ['ad_group_id','keyword_id','ad_id','search_term'] -%}
+{%- set dimensions = ['ad_group_id','keyword_id','ad_id'] -%}
 {%- set measures = adapter.get_columns_in_relation(ref('googleads_keywords_ads_insights'))
                     |map(attribute="name")
                     |reject("in",exclude_fields)
