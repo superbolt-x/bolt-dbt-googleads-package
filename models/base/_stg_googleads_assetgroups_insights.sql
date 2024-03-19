@@ -4,7 +4,7 @@
 ) }}
 
 
-{%- set schema_name, insights_table_name, convtype_table_name = 'googleads_raw', 'asset_group_performance_report', 'campaign_convtype_performance_report' -%}
+{%- set schema_name, insights_table_name, convtype_table_name = 'gsheet_raw', 'asset_group_performance_report', 'campaign_convtype_performance_report' -%}
 {%- set insights_exclude_fields = []
 -%}
 {%- set convtype_include_fields = [
