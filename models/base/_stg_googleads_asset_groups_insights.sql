@@ -57,7 +57,6 @@ WITH insights AS
     {%- endif %}
 
 SELECT *,
-    MAX(_fivetran_synced) over (PARTITION BY account_id) as last_updated,
     asset_group_id||'_'||date as unique_key
 FROM insights
 {%- if convtype_table_exists %}
