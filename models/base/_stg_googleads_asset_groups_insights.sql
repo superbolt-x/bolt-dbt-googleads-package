@@ -45,7 +45,7 @@ WITH insights AS
     , convtype AS (
     SELECT 
         date, 
-        id as campaign_id, 
+        id as asse_group_id, 
         {% for conversion in conversions -%}
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }} ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}",
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }}_value ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}_value"
