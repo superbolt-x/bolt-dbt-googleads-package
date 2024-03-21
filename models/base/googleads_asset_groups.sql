@@ -17,9 +17,9 @@ WITH staging AS
     FROM 
         (SELECT
             {{ selected_fields|join(", ") }},
-            MAX(updated_at) OVER (PARTITION BY id) as last_updated_at
+            /* MAX(updated_at) OVER (PARTITION BY id) as last_updated_at */
         FROM {{ source(schema_name, table_name) }})
-    WHERE updated_at = last_updated_at
+    /* WHERE updated_at = last_updated_at */
     )
 
 SELECT *,
