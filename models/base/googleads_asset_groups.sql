@@ -1,5 +1,5 @@
 {%- set selected_fields = [
-    "asset_group_id",
+    "id",
     "asset_group_name",
 ] -%}
 {%- set schema_name, table_name = 'gsheet_raw', 'asset_groups' -%}
