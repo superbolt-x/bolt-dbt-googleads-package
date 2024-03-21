@@ -1,10 +1,6 @@
 {%- set selected_fields = [
-    "customer_id",
     "id",
-    "name",
-    "status",
-    "advertising_channel_type",
-    "updated_at"
+    "asset_group_name",
 ] -%}
 {%- set schema_name, table_name = 'gsheet_raw', 'asset_groups' -%}
 
