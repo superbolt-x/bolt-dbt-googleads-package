@@ -41,6 +41,8 @@ sources:
     tables:
     - name: asset_group_performance_report
       identifier: googleads_asset_group_performance_report
+    - name: asset_group_convtype_performance_report
+      identifier: googleads_asset_group_convtype_performance_report  
     - name: asset_groups
       identifier: googleads_asset_groups
 
