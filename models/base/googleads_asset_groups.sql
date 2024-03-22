@@ -1,5 +1,6 @@
 {%- set selected_fields = [
-    "id",
+    "campaign_id",
+    "asset_group_id",
     "asset_group_name",
     "status"
 ] -%}
