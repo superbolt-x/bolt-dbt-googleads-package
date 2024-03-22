@@ -31,7 +31,7 @@ WITH
     ),
     {%- endfor %}
 
-    asset_group AS 
+    asset_groups AS 
     (SELECT {{ dbt_utils.star(from = ref('googleads_asset_groups'), except = ["unique_key"]) }}
     FROM {{ ref('googleads_asset_groups') }}
     ),
@@ -58,5 +58,7 @@ FROM
 
     {%- endfor %}
     )
+
+LEFT JOIN asset_groups USING(asset_group_id)
 LEFT JOIN campaigns USING(campaign_id)
 LEFT JOIN accounts USING(account_id)
