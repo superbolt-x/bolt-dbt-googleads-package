@@ -101,6 +101,22 @@
         
         {%- endif -%}
 
+    {%- elif 'asset_group' in table_name -%}
+
+        {%- if column_name == 'asset_group_id' -%}
+        {{column_name}}::VARCHAR as asset_group_id
+
+        {%- elif column_name == 'campaign_id' -%}
+        {{column_name}}::VARCHAR as campaign_id
+
+        {%- elif column_name == 'customer_id' -%}
+        {{column_name}}::VARCHAR as customer_id
+
+        {%- else -%}
+        {{column_name}}
+        
+        {%- endif -%}
+
 
     {%- else -%}
     {{column_name}}
