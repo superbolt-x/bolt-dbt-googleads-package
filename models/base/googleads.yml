@@ -107,6 +107,23 @@ models:
       - name: unique_key
         tests: 
           - unique
+  - name: googleads_asset_groups
+    columns: 
+      - name: unique_key
+        tests:
+          - unique
+          - not_null
+  - name: _stg_googleads_asset_groups_insights
+    columns: 
+      - name: unique_key
+        tests:
+          - unique
+          - not_null 
+  - name: googleads_performance_by_asset_group
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
   - name: _stg_googleads_searchterms_insights 
     columns:
       - name: unique_key
