@@ -47,7 +47,7 @@ WITH
     )
 
 SELECT *,
-    {{ get_googleads_default_campaign_types('asset_group_name')}},
+    {{ get_googleads_default_campaign_types('campaign_name')}},
     date||'_'||date_granularity||'_'||asset_group_id as unique_key
 FROM 
     ({% for date_granularity in date_granularity_list -%}
