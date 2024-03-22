@@ -59,6 +59,6 @@ FROM
     {%- endfor %}
     )
 
-LEFT JOIN asset_groups USING(asset_group_id)
+LEFT JOIN asset_groups USING(campaign_id, asset_group_id)
 LEFT JOIN campaigns USING(campaign_id)
 LEFT JOIN accounts USING(account_id)
