@@ -4,7 +4,7 @@
     "asset_group_name",
     "status"
 ] -%}
-{%- set schema_name, table_name = 'gsheet_raw', 'asset_groups' -%}
+{%- set schema_name, table_name = 'gsheet_raw', 'googleads_asset_groups' -%}
 
 WITH staging AS 
     (SELECT 
