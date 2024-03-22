@@ -106,10 +106,10 @@
         {%- if column_name == 'asset_group_id' -%}
         {{column_name}}::VARCHAR as asset_group_id
 
-        {%- if column_name == 'campaign_id' -%}
+        {%- elif column_name == 'campaign_id' -%}
         {{column_name}}::VARCHAR as campaign_id
 
-        {%- if column_name == 'customer_id' -%}
+        {%- elif column_name == 'customer_id' -%}
         {{column_name}}::VARCHAR as customer_id
 
         {%- else -%}
