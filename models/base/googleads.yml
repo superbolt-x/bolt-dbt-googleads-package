@@ -72,13 +72,13 @@ models:
       - name: unique_key
         tests: 
           - unique
-  - name: _stg_googleads_campaigns_insights_region 
+  - name: _stg_googleads_geo_insights
     columns:
       - name: unique_key
         tests: 
           - unique
           - not_null
-  - name: googleads_performance_by_campaign_region
+  - name: googleads_performance_by_campaign_geo
     columns:
       - name: unique_key
         tests: 
