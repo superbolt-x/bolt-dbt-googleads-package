@@ -20,7 +20,7 @@
 -%}
 {%- set convtype_include_fields = [
     "date",
-    "id",
+    "campaign_id",
     "geo_target_state",
     "geo_target_city",
     "geo_target_metro",
