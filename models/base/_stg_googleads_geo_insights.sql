@@ -78,7 +78,7 @@ SELECT *,
     campaign_id||'_'||date||'_'||geo_target_state||'_'||geo_target_city||'_'||geo_target_metro as unique_key
 FROM insights
 {%- if convtype_table_exists %}
-LEFT JOIN convtype USING(date, campaign_id, geo_target_state, geo_target_state, geo_target_metro)
+LEFT JOIN convtype USING(date, campaign_id, geo_target_state, geo_target_city, geo_target_metro)
 {%- endif %}
 {% if is_incremental() -%}
 
