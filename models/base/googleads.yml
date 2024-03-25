@@ -35,6 +35,9 @@ sources:
       - name: search_term_convtype_performance_report
       - name: shopping_performance_report
       - name: shopping_convtype_performance_report
+      - name: geo_performance_report
+      - name: geo_convtype_performance_report
+      - name: geo_target
       
   - name: gsheet_raw
     schema: gsheet_raw
