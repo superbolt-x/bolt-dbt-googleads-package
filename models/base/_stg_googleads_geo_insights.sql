@@ -59,7 +59,10 @@ WITH insights AS
     , convtype AS (
     SELECT 
         date, 
-        campaign_id, 
+        campaign_id,
+        geo_target_state,
+        geo_target_city,
+        geo_target_metro,
         {% for conversion in conversions -%}
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }} ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}",
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }}_value ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}_value"
@@ -75,7 +78,7 @@ SELECT *,
     campaign_id||'_'||date||'_'||geo_target_state||'_'||geo_target_city||'_'||geo_target_metro as unique_key
 FROM insights
 {%- if convtype_table_exists %}
-LEFT JOIN convtype USING(date, campaign_id, geo_target_state, geo_target_city, geo_target_metro)
+LEFT JOIN convtype USING(date, campaign_id, geo_target_state, geo_target_state, geo_target_metro)
 {%- endif %}
 {% if is_incremental() -%}
 
