@@ -78,7 +78,7 @@ models:
         tests: 
           - unique
           - not_null
-  - name: googleads_performance_by_campaign_geo
+  - name: googleads_performance_by_geo
     columns:
       - name: unique_key
         tests: 
