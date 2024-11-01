@@ -15,6 +15,8 @@ sources:
       - name: campaign_convtype_performance_report
       - name: ad_groups
         identifier: ad_group_history
+      - name: asset_group_performance_report
+        identifier: asset_group_performance_report
       - name: ads
         identifier: ad_history
       - name: expanded_text_ads
@@ -38,15 +40,6 @@ sources:
       - name: geo_performance_report
       - name: geo_convtype_performance_report
       - name: geo_target
-      
-  - name: gsheet_raw
-    schema: gsheet_raw
-    tables:
-    - name: asset_group_performance_report
-      identifier: googleads_asset_group_performance_report
-    - name: asset_group_convtype_performance_report
-      identifier: googleads_asset_group_convtype_performance_report  
-    - name: googleads_asset_groups
 
 models:
   - name: googleads_accounts
