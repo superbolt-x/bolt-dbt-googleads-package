@@ -4,20 +4,10 @@
     "asset_group_name",
     "status"
 ] -%}
-{%- set schema_name, table_name = 'gsheet_raw', 'googleads_asset_groups' -%}
+{%- set schema_name, table_name = 'googleads_raw', 'asset_group_performance_report' -%}
 
-WITH staging AS 
-    (SELECT 
-        {% for field in selected_fields|reject("eq","updated_at") -%}
-        {{ get_googleads_clean_field(table_name, field) }}
-        {%- if not loop.last %},{%- endif %}
-        {% endfor -%}
-    FROM 
-        (SELECT
-            {{ selected_fields|join(", ") }}
-        FROM {{ source(schema_name, table_name) }})
-    )
+WITH staging AS (select *, max(date) over (partition by id) as max_update from {{ source(schema_name, table_name) }})
 
-SELECT *,
-    asset_group_id as unique_key
-FROM staging 
+select campaign_id, id as asset_group_id, name as asset_group_name, status as asset_group_status
+from staging 
+where date = max_update
