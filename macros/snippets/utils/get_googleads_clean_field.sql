@@ -13,9 +13,6 @@
 
     {%- elif column_name == 'ad_group_ad_status' -%}
         {{column_name}} as ad_status
-    
-    {%- elif column_name == 'asset_group_status' -%}
-        {{column_name}} as ad_status
 
     {%- elif column_name == 'cost_micros' -%}
        {{column_name}}::float/1000000 as spend
@@ -58,7 +55,7 @@
 
     {%- elif "asset_group" in table_name -%}
 
-        {%- if column_name in ("status") -%}
+        {%- if column_name in ("id","name","status") -%}
         {{column_name}} as asset_group_{{column_name}}
 
         {%- else -%}
