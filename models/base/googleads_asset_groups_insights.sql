@@ -6,6 +6,7 @@
 {%- set exclude_fields = [
     "unique_key",
     "asset_group_name",
+    "asset_group_staus",
     "campaign_id",
     "account_id",
     "account_currency_code",
