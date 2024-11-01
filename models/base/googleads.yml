@@ -16,7 +16,7 @@ sources:
       - name: ad_groups
         identifier: ad_group_history
       - name: asset_group_performance_report
-        identifier: asset_group_performance_report
+      - name: asset_group_convtype_performance_report
       - name: ads
         identifier: ad_history
       - name: expanded_text_ads
