@@ -5,7 +5,7 @@
 
 {%- set exclude_fields = [
     "unique_key",
-    "fivetran_id",
+    "_fivetran_id",
     "customer_time_zone",
     "campaign",
     "day_of_week",
