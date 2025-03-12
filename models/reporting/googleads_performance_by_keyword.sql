@@ -3,7 +3,7 @@
 )}}
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
+{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key', 'quality_info_creative_score', 'quality_info_post_click_score', 'quality_info_score', 'quality_info_search_predicted_ctr'] -%}
 {%- set dimensions = ['ad_group_id','keyword_id'] -%}
 {%- set measures = adapter.get_columns_in_relation(ref('googleads_keywords_insights'))
                     |map(attribute="name")
