@@ -23,7 +23,11 @@
     "gmail_saves",
     "gmail_secondary_clicks",
     "video_quartile_p_25_rate",
-    "active_view_measurable_cost_micros"
+    "active_view_measurable_cost_micros",
+    "creative_quality_score",
+    "post_click_quality_score",
+    "quality_score",
+    "search_predicted_ctr"
 ]
 -%}
 
