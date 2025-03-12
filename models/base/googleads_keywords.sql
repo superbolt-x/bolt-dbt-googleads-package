@@ -6,7 +6,11 @@
     "negative",
     "status",
     "cpc_bid_micros",
-    "updated_at"
+    "updated_at",
+    "creative_quality_score",
+    "post_click_quality_score",
+    "quality_score",
+    "search_predicted_ctr"
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'keywords' -%}
 
