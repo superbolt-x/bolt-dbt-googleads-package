@@ -24,9 +24,9 @@
     "gmail_secondary_clicks",
     "video_quartile_p_25_rate",
     "active_view_measurable_cost_micros",
-    "quality_info_creative_score",
-    "quality_info_post_click_score",
-    "quality_info_score",
+    "quality_info_creative_quality_score",
+    "quality_info_post_click_quality_score",
+    "quality_info_quality_score",
     "quality_info_search_predicted_ctr"
 ]
 -%}
