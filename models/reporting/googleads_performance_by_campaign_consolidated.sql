@@ -10,28 +10,6 @@
 {%- set exclude_fields = [
     "unique_key",
     "_fivetran_synced",
-    "account_name",
-    "account_currency_code",
-    "campaign_name",
-    "campaign_status",
-    "advertising_channel_type",
-    "gmail_saves",
-    "gmail_forwards",
-    "gmail_secondary_clicks",
-    "content_impression_share",
-    "content_budget_lost_impression_share",
-    "content_rank_lost_impression_share",
-    "video_quartile_p_25_rate",
-    "campaign_budget_has_recommended_budget",
-    "campaign_budget_recommended_budget_amount_micros",
-    "campaign_budget",
-    "campaign_budget_period",
-    "campaign_budget_total_amount_micros",
-    "campaign_budget_explicitly_shared",
-    "interactions",
-    "active_view_measurability",
-    "active_view_viewability",
-    "active_view_measurable_cost_micros",
     "last_updated"
 ]
 -%}
@@ -121,11 +99,11 @@ WITH
     ),
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
-{%- set dimensions = ['campaign_id', 'account_id'] -%}
+{%- set exclude_dimensions = ['date','day','week','month','quarter','year','account_name','account_currency_code','campaign_name','campaign_status','advertising_channel_type'] -%}
+{%- set dimensions = ['campaign_id'] -%}
 {%- set measures = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights'))
                     |map(attribute="name")
-                    |reject("in",exclude_fields)
+                    |reject("in",exclude_dimensions)
                     |reject("in",dimensions)
                     |list
                     -%}  
