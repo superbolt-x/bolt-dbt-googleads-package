@@ -101,12 +101,43 @@ WITH
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
 {%- set exclude_dimensions = ['date','day','week','month','quarter','year','account_name','account_currency_code','campaign_name','campaign_status','advertising_channel_type'] -%}
 {%- set dimensions = ['campaign_id'] -%}
-{%- set measures = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights'))
-                    |map(attribute="name")
-                    |reject("in",exclude_dimensions)
-                    |reject("in",dimensions)
-                    |list
-                    -%}  
+
+    /* Get column data types to handle boolean fields properly */
+    {% set column_data = run_query("
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_schema = '" ~ this.schema ~ "' 
+      AND table_name = '_stg_googleads_campaigns_insights'
+    ") %}
+    
+    {% if execute %}
+      {% set columns = column_data.columns[0].values() %}
+      {% set data_types = column_data.columns[1].values() %}
+      {% set column_dict = {} %}
+      {% for i in range(columns|length) %}
+        {% do column_dict.update({columns[i]: data_types[i]}) %}
+      {% endfor %}
+    {% endif %}
+
+    /* Define measure list based on data types */
+    {%- set numeric_measures = [] -%}
+    {%- set boolean_measures = [] -%}
+    {%- set other_measures = [] -%}
+    
+    {% if execute %}
+      {% for col in adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights')) %}
+        {% set col_name = col.name %}
+        {% if col_name not in exclude_dimensions and col_name not in dimensions and col_name not in exclude_fields %}
+          {% if column_dict.get(col_name) in ('integer', 'bigint', 'decimal', 'numeric', 'real', 'double precision') %}
+            {% do numeric_measures.append(col_name) %}
+          {% elif column_dict.get(col_name) == 'boolean' %}
+            {% do boolean_measures.append(col_name) %}
+          {% else %}
+            {% do other_measures.append(col_name) %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
  
     {%- for date_granularity in date_granularity_list %}
 
@@ -117,10 +148,25 @@ WITH
         {%- for dimension in dimensions %}
         {{ dimension }},
         {%-  endfor %}
-        {% for measure in measures -%}
+        
+        /* Handle numeric measures */
+        {%- for measure in numeric_measures %}
         COALESCE(SUM("{{ measure }}"),0) as "{{ measure }}"
+        {%- if not loop.last or boolean_measures|length > 0 or other_measures|length > 0 %},{%- endif %}
+        {%- endfor %}
+        
+        /* Handle boolean measures */
+        {%- for measure in boolean_measures %}
+        BOOL_OR("{{ measure }}") as "{{ measure }}"
+        {%- if not loop.last or other_measures|length > 0 %},{%- endif %}
+        {%- endfor %}
+        
+        /* Handle other measures */
+        {%- for measure in other_measures %}
+        MAX("{{ measure }}") as "{{ measure }}"
         {%- if not loop.last %},{%- endif %}
-        {% endfor %}
+        {%- endfor %}
+        
     FROM insights_stg
     GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}
     ),
