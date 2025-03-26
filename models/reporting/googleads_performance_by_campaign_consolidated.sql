@@ -31,6 +31,7 @@ WITH
 
     {%- set exchange_rate = 1 if var('currency') == 'USD' else 'exchange_rate' %}
 
+    /* Create a view of insights with proper currency conversion */
     insights AS 
     (SELECT 
         {%- for field in stg_fields -%}
@@ -47,6 +48,7 @@ WITH
     {%- endif %}
     ),
 
+    /* Add date parts (day, week, month, etc.) */
     insights_stg AS 
     (SELECT *,
     {{ get_date_parts('date') }}
@@ -62,6 +64,7 @@ WITH
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'campaigns' -%}
 
+    /* Get campaign data */
     campaigns_staging AS 
     (SELECT 
         {% for field in selected_fields|reject("eq","updated_at") -%}
@@ -84,6 +87,7 @@ WITH
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'accounts' -%}
 
+    /* Get account data */
     accounts_staging AS 
     (SELECT 
         {% for field in selected_fields|reject("eq","updated_at") -%}
@@ -99,79 +103,58 @@ WITH
     ),
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set exclude_dimensions = ['date','day','week','month','quarter','year','account_name','account_currency_code','campaign_name','campaign_status','advertising_channel_type'] -%}
-{%- set dimensions = ['campaign_id'] -%}
+{%- set base_columns = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights')) %}
 
-    /* Get column data types to handle boolean fields properly */
-    {% set column_data = run_query("
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_schema = '" ~ this.schema ~ "' 
-      AND table_name = '_stg_googleads_campaigns_insights'
-    ") %}
-    
-    {% if execute %}
-      {% set columns = column_data.columns[0].values() %}
-      {% set data_types = column_data.columns[1].values() %}
-      {% set column_dict = {} %}
-      {% for i in range(columns|length) %}
-        {% do column_dict.update({columns[i]: data_types[i]}) %}
-      {% endfor %}
-    {% endif %}
+    /* Manual list of boolean fields */
+    {% set boolean_fields = [
+        'campaign_budget_explicitly_shared',
+        'active_view_measurability',
+        'active_view_viewability',
+        'has_recommended_budget' 
+    ] %}
 
-    /* Define measure list based on data types */
-    {%- set numeric_measures = [] -%}
-    {%- set boolean_measures = [] -%}
-    {%- set other_measures = [] -%}
-    
-    {% if execute %}
-      {% for col in adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights')) %}
-        {% set col_name = col.name %}
-        {% if col_name not in exclude_dimensions and col_name not in dimensions and col_name not in exclude_fields %}
-          {% if column_dict.get(col_name) in ('integer', 'bigint', 'decimal', 'numeric', 'real', 'double precision') %}
-            {% do numeric_measures.append(col_name) %}
-          {% elif column_dict.get(col_name) == 'boolean' %}
-            {% do boolean_measures.append(col_name) %}
-          {% else %}
-            {% do other_measures.append(col_name) %}
-          {% endif %}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
- 
+    /* Generate aggregation queries for each date granularity */
     {%- for date_granularity in date_granularity_list %}
 
     performance_{{date_granularity}} AS 
     (SELECT 
         '{{date_granularity}}' as date_granularity,
         {{date_granularity}} as date,
-        {%- for dimension in dimensions %}
-        {{ dimension }},
-        {%-  endfor %}
+        campaign_id,
+        account_id,
         
-        /* Handle numeric measures */
-        {%- for measure in numeric_measures %}
-        COALESCE(SUM("{{ measure }}"),0) as "{{ measure }}"
-        {%- if not loop.last or boolean_measures|length > 0 or other_measures|length > 0 %},{%- endif %}
-        {%- endfor %}
+        /* Measure fields that need special handling */
+        {% for boolean_field in boolean_fields %}
+            {% if boolean_field in stg_fields|map('lower')|list %}
+            BOOL_OR({{ boolean_field }})::INT as {{ boolean_field }},
+            {% endif %}
+        {% endfor %}
+
+        /* Regular numeric aggregations for common metrics */
+        SUM(impressions) as impressions,
+        SUM(clicks) as clicks,
+        SUM(spend) as spend,
+        SUM(conversions) as conversions,
+        SUM(conversions_value) as conversions_value,
+        SUM(all_conversions) as all_conversions,
+        SUM(all_conversions_value) as all_conversions_value,
         
-        /* Handle boolean measures */
-        {%- for measure in boolean_measures %}
-        BOOL_OR("{{ measure }}") as "{{ measure }}"
-        {%- if not loop.last or other_measures|length > 0 %},{%- endif %}
-        {%- endfor %}
-        
-        /* Handle other measures */
-        {%- for measure in other_measures %}
-        MAX("{{ measure }}") as "{{ measure }}"
-        {%- if not loop.last %},{%- endif %}
-        {%- endfor %}
-        
+        /* Handle any other fields by checking if they exist */
+        {% for col in base_columns %}
+            {% set col_name = col.name|lower %}
+            {% if col_name not in ['date', 'campaign_id', 'account_id', 'impressions', 'clicks', 'spend', 'conversions', 'conversions_value', 'all_conversions', 'all_conversions_value', 'unique_key', '_fivetran_synced', 'last_updated'] %}
+                {% if col_name not in boolean_fields %}
+                    {% if loop.index > 1 %},{% endif %}
+                    SUM({{ col_name }}) as {{ col_name }}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
     FROM insights_stg
-    GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}
+    GROUP BY 1, 2, 3, 4
     ),
     {%- endfor %}
 
+    /* Simplified dimension tables */
     campaigns AS 
     (SELECT account_id, campaign_id, campaign_name, campaign_status, advertising_channel_type
     FROM campaigns_staging
@@ -182,6 +165,7 @@ WITH
     FROM accounts_staging
     )
 
+/* Final output query */
 SELECT *,
     {{ get_googleads_default_campaign_types('campaign_name')}},
     date||'_'||date_granularity||'_'||campaign_id as unique_key
