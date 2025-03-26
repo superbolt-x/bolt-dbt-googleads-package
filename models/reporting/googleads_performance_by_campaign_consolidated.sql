@@ -122,13 +122,11 @@ WITH
     ),
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
+{%- set exclude_fields_for_measures = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
 {%- set dimensions = ['campaign_id'] -%}
-{%- set measures = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights'))
-                    |map(attribute="name")
-                    |reject("in",exclude_fields)
+{%- set measures = stg_fields
+                    |reject("in",exclude_fields_for_measures)
                     |reject("in",dimensions)
-                    |reject("in",stg_fields|reject("in",currency_fields))
                     |list
                     -%}
  
