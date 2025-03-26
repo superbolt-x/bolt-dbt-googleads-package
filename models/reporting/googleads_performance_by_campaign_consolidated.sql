@@ -10,7 +10,30 @@
 {%- set exclude_fields = [
     "unique_key",
     "_fivetran_synced",
-    "last_updated"
+    "account_id",
+    "account_name",
+    "account_currency_code",
+    "campaign_name",
+    "campaign_status",
+    "advertising_channel_type",
+    "gmail_saves",
+    "gmail_forwards",
+    "gmail_secondary_clicks",
+    "content_impression_share",
+    "content_budget_lost_impression_share",
+    "content_rank_lost_impression_share",
+    "video_quartile_p_25_rate",
+    "campaign_budget_has_recommended_budget",
+    "campaign_budget_recommended_budget_amount_micros",
+    "campaign_budget",
+    "campaign_budget_period",
+    "campaign_budget_total_amount_micros",
+    "campaign_budget_explicitly_shared",
+    "interactions",
+    "active_view_measurability",
+    "active_view_viewability",
+    "active_view_measurable_cost_micros",
+    "_fivetran_synced"
 ]
 -%}
 
@@ -31,7 +54,6 @@ WITH
 
     {%- set exchange_rate = 1 if var('currency') == 'USD' else 'exchange_rate' %}
 
-    /* Create a view of insights with proper currency conversion */
     insights AS 
     (SELECT 
         {%- for field in stg_fields -%}
@@ -48,7 +70,6 @@ WITH
     {%- endif %}
     ),
 
-    /* Add date parts (day, week, month, etc.) */
     insights_stg AS 
     (SELECT *,
     {{ get_date_parts('date') }}
@@ -64,7 +85,6 @@ WITH
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'campaigns' -%}
 
-    /* Get campaign data */
     campaigns_staging AS 
     (SELECT 
         {% for field in selected_fields|reject("eq","updated_at") -%}
@@ -87,7 +107,6 @@ WITH
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'accounts' -%}
 
-    /* Get account data */
     accounts_staging AS 
     (SELECT 
         {% for field in selected_fields|reject("eq","updated_at") -%}
@@ -103,58 +122,33 @@ WITH
     ),
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set base_columns = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights')) %}
-
-    /* Manual list of boolean fields */
-    {% set boolean_fields = [
-        'campaign_budget_explicitly_shared',
-        'active_view_measurability',
-        'active_view_viewability',
-        'has_recommended_budget' 
-    ] %}
-
-    /* Generate aggregation queries for each date granularity */
+{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
+{%- set dimensions = ['campaign_id'] -%}
+{%- set measures = adapter.get_columns_in_relation(ref('googleads_campaigns_insights'))
+                    |map(attribute="name")
+                    |reject("in",exclude_fields)
+                    |reject("in",dimensions)
+                    |list
+                    -%}  
+ 
     {%- for date_granularity in date_granularity_list %}
 
     performance_{{date_granularity}} AS 
     (SELECT 
         '{{date_granularity}}' as date_granularity,
         {{date_granularity}} as date,
-        campaign_id,
-        account_id,
-        
-        /* Measure fields that need special handling */
-        {% for boolean_field in boolean_fields %}
-            {% if boolean_field in stg_fields|map('lower')|list %}
-            BOOL_OR({{ boolean_field }})::INT as {{ boolean_field }},
-            {% endif %}
-        {% endfor %}
-
-        /* Regular numeric aggregations for common metrics */
-        SUM(impressions) as impressions,
-        SUM(clicks) as clicks,
-        SUM(spend) as spend,
-        SUM(conversions) as conversions,
-        SUM(conversions_value) as conversions_value,
-        SUM(all_conversions) as all_conversions,
-        SUM(all_conversions_value) as all_conversions_value,
-        
-        /* Handle any other fields by checking if they exist */
-        {% for col in base_columns %}
-            {% set col_name = col.name|lower %}
-            {% if col_name not in ['date', 'campaign_id', 'account_id', 'impressions', 'clicks', 'spend', 'conversions', 'conversions_value', 'all_conversions', 'all_conversions_value', 'unique_key', '_fivetran_synced', 'last_updated'] %}
-                {% if col_name not in boolean_fields %}
-                    {% if loop.index > 1 %},{% endif %}
-                    SUM({{ col_name }}) as {{ col_name }}
-                {% endif %}
-            {% endif %}
+        {%- for dimension in dimensions %}
+        {{ dimension }},
+        {%-  endfor %}
+        {% for measure in measures -%}
+        COALESCE(SUM("{{ measure }}"),0) as "{{ measure }}"
+        {%- if not loop.last %},{%- endif %}
         {% endfor %}
     FROM insights_stg
-    GROUP BY 1, 2, 3, 4
+    GROUP BY {{ range(1, dimensions|length +2 +1)|list|join(',') }}
     ),
     {%- endfor %}
 
-    /* Simplified dimension tables */
     campaigns AS 
     (SELECT account_id, campaign_id, campaign_name, campaign_status, advertising_channel_type
     FROM campaigns_staging
@@ -165,7 +159,6 @@ WITH
     FROM accounts_staging
     )
 
-/* Final output query */
 SELECT *,
     {{ get_googleads_default_campaign_types('campaign_name')}},
     date||'_'||date_granularity||'_'||campaign_id as unique_key
