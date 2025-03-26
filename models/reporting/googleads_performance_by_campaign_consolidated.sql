@@ -10,7 +10,6 @@
 {%- set exclude_fields = [
     "unique_key",
     "_fivetran_synced",
-    "account_id",
     "account_name",
     "account_currency_code",
     "campaign_name",
@@ -33,7 +32,7 @@
     "active_view_measurability",
     "active_view_viewability",
     "active_view_measurable_cost_micros",
-    "_fivetran_synced"
+    "last_updated"
 ]
 -%}
 
@@ -123,7 +122,7 @@ WITH
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
 {%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
-{%- set dimensions = ['campaign_id'] -%}
+{%- set dimensions = ['campaign_id', 'account_id'] -%}
 {%- set measures = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights'))
                     |map(attribute="name")
                     |reject("in",exclude_fields)
