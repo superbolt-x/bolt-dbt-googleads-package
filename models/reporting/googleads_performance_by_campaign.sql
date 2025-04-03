@@ -1,5 +1,5 @@
 {{ config (
-    alias = target.database + '_googleads_performance_by_campaign_consolidated'
+    alias = target.database + '_googleads_performance_by_campaign'
 )}}
 
 {%- set currency_fields = [
