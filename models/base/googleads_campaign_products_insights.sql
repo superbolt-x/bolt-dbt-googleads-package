@@ -16,6 +16,8 @@
     "campaign_name",
     "account_name",
     "campaign_status",
+    "campaign_advertising_channel_type",
+    "campaign_advertising_channel_sub_type",
     "advertising_channel_type",
     "gmail_saves",
     "gmail_forwards",
