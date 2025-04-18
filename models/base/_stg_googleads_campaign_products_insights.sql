@@ -22,6 +22,7 @@
     "date",
     "campaign_id",
     "product_item_id",
+    "product_title",
     "conversion_action_name",
     "conversions",
     "conversions_value",
@@ -59,22 +60,23 @@ WITH insights AS
         date, 
         campaign_id, 
         product_item_id,
+        product_title,
         {% for conversion in conversions -%}
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }} ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}",
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }}_value ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}_value"
         {%- if not loop.last %},{%- endif %}
         {% endfor %}
     FROM convtype_raw
-    GROUP BY 1,2,3   
+    GROUP BY 1,2,3,4   
     )
     {%- endif %}
 
 SELECT *,
     MAX(_fivetran_synced) over (PARTITION BY account_id) as last_updated,
-    campaign_id||'_'||product_item_id||'_'||date as unique_key
+    campaign_id||'_'||product_item_id||'_'||product_title||'_'||date as unique_key
 FROM insights
 {%- if convtype_table_exists %}
-LEFT JOIN convtype USING(date, campaign_id,product_item_id)
+LEFT JOIN convtype USING(date, campaign_id,product_item_id,product_title)
 {%- endif %}
 {% if is_incremental() -%}
 
