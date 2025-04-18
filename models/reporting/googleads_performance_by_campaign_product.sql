@@ -23,6 +23,8 @@
     "campaign_status",
     "campaign_serving_status",
     "campaign_status",
+    "campaign_advertising_channel_type",
+    "campaign_advertising_channel_sub_type",
     "advertising_channel_type",
     "gmail_saves",
     "gmail_forwards",
