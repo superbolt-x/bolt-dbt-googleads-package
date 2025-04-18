@@ -14,6 +14,8 @@
     "account_name",
     "account_currency_code",
     "campaign_name",
+    "campaign_start_date",
+    "campaign_end_date",
     "campaign_status",
     "advertising_channel_type",
     "gmail_saves",
@@ -33,6 +35,7 @@
     "active_view_measurability",
     "active_view_viewability",
     "active_view_measurable_cost_micros",
+    "last_updated",
     "_fivetran_synced"
 ]
 -%}
