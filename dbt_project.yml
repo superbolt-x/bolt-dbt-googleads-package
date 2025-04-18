@@ -39,11 +39,7 @@ models:
     base:
       +schema: googleads_base
       +materialized: table
-
-      _stg_googleads_searchterms_insights:
-        +enabled: false
-      googleads_searchterms_insights:
-        +enabled: false
+      
       _stg_googleads_shopping_insights:
         +enabled: false
       googleads_shopping_insights:
@@ -53,7 +49,5 @@ models:
       +schema: reporting
       +materialized: table
 
-      googleads_performance_by_searchterm:
-        +enabled: false
       googleads_performance_by_shopping_product:
         +enabled: false
