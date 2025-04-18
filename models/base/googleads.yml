@@ -29,6 +29,8 @@ sources:
       - name: ad_convtype_performance_report
       - name: keywords
         identifier: ad_group_criterion_history
+      - name: campaign_product_performance_report
+      - name: campaign_product_convtype_performance_report
       - name: keyword_performance_report
       - name: keyword_convtype_performance_report
       - name: keyword_ad_performance_report
