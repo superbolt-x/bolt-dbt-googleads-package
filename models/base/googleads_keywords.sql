@@ -7,8 +7,8 @@
     "status",
     "cpc_bid_micros",
     "updated_at",
-    "quality_info_creative_score",
-    "quality_info_post_click_score",
+    "quality_info_creative_quality_score",
+    "quality_info_post_click_quality_score",
     "quality_info_quality_score",
     "quality_info_search_predicted_ctr"
 ] -%}
