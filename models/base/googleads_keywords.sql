@@ -9,7 +9,7 @@
     "updated_at",
     "quality_info_creative_score",
     "quality_info_post_click_score",
-    "quality_info_score",
+    "quality_info_quality_score",
     "quality_info_search_predicted_ctr"
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'keywords' -%}
