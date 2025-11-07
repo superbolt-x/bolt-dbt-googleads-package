@@ -69,7 +69,7 @@ models:
       - name: unique_key
         tests: 
           - unique
-  - name: _stg_googleads_ad_group_insights 
+  - name: _stg_googleads_ad_groups_insights 
     columns:
       - name: unique_key
         tests: 
