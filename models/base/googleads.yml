@@ -15,6 +15,8 @@ sources:
       - name: campaign_convtype_performance_report
       - name: ad_groups
         identifier: ad_group_history
+      - name: ad_group_performance_report
+      - name: ad_group_convtype_performance_report
       - name: asset_group_performance_report
       - name: asset_group_convtype_performance_report
       - name: ads
@@ -63,6 +65,17 @@ models:
           - unique
           - not_null
   - name: googleads_performance_by_campaign
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
+  - name: _stg_googleads_ad_group_insights 
+    columns:
+      - name: unique_key
+        tests: 
+          - unique
+          - not_null
+  - name: googleads_performance_by_ad_group
     columns:
       - name: unique_key
         tests: 
