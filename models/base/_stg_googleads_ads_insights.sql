@@ -116,7 +116,7 @@ WITH insights AS
         {%- if not loop.last %},{%- endif %}
         {% endfor %}
     FROM convtype_raw
-    GROUP BY 1,2   
+    GROUP BY 1,2,3   
     )
     {%- endif %}
 
