@@ -72,6 +72,7 @@
 {%- set convtype_include_fields = [
     "date",
     "ad_id",
+    "ad_group_id",
     "conversion_action_name",
     "conversions",
     "conversions_value",
@@ -107,7 +108,8 @@ WITH insights AS
     , convtype AS (
     SELECT 
         date, 
-        ad_id, 
+        ad_id,
+        ad_group_id,
         {% for conversion in conversions -%}
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }} ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}",
         COALESCE(SUM(CASE WHEN conversion_action_name = '{{conversion}}' THEN {{ var('googleads_conversion_used_by_custom_conversions') }}_value ELSE 0 END), 0) as "{{get_clean_conversion_name(conversion)}}_value"
@@ -120,10 +122,10 @@ WITH insights AS
 
 SELECT *,
     MAX(_fivetran_synced) over (PARTITION BY account_id) as last_updated,
-    ad_id||'_'||date as unique_key
+    ad_id||'_'||ad_group_id||'_'||date as unique_key
 FROM insights
 {%- if convtype_table_exists %}
-LEFT JOIN convtype USING(date, ad_id)
+LEFT JOIN convtype USING(date, ad_id, ad_group_id)
 {%- endif %}
 {% if is_incremental() -%}
 
