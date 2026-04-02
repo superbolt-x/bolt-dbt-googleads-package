@@ -125,7 +125,7 @@ WITH
     ),
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key'] -%}
+{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key','end_date_time','start_date_time'] -%}
 {%- set dimensions = ['campaign_id'] -%}
 {%- set measures = adapter.get_columns_in_relation(ref('googleads_campaigns_insights'))
                     |map(attribute="name")
