@@ -1,6 +1,25 @@
 {{ config (
-    alias = target.database + '_googleads_performance_by_campaign'
+    alias = target.database + '_googleads_performance_by_campaign',
+    materialized = 'incremental',
+    unique_key = 'unique_key',
+    incremental_strategy = 'delete+insert',
+    on_schema_change = 'append_new_columns'
 )}}
+
+{#-
+    Campaign performance, all date granularities in one table.
+
+    Reads the day-grain incremental staging model directly (no redundant
+    googleads_campaigns_insights middle table), applies currency conversion +
+    date parts, rolls up day/week/month/quarter/year, and joins campaign +
+    account metadata built inline from the raw history tables.
+
+    Incremental: daily runs reprocess from the start of the year containing
+    (max date - googleads_lookback_days). Reading whole periods keeps the
+    week/month/quarter/year roll-ups complete; data older than the conversion
+    lookback window does not change. Run --full-refresh weekly to rebuild all
+    history and refresh campaign names/status on older rows.
+-#}
 
 {%- set currency_fields = [
     "spend"
@@ -35,30 +54,30 @@
     "active_view_measurability",
     "active_view_viewability",
     "active_view_measurable_cost_micros",
-    "last_updated",
-    "_fivetran_synced"
+    "last_updated"
 ]
 -%}
 
 {%- set stg_fields = adapter.get_columns_in_relation(ref('_stg_googleads_campaigns_insights'))
                     |map(attribute="name")
                     |reject("in",exclude_fields)
-                    -%}  
+                    |list
+                    -%}
 
-WITH 
+WITH
     {% if var('currency') != 'USD' -%}
     currency AS
-    (SELECT DISTINCT date, "{{ var('currency') }}" as raw_rate, 
+    (SELECT DISTINCT date, "{{ var('currency') }}" as raw_rate,
         LAG(raw_rate) ignore nulls over (order by date) as exchange_rate
-    FROM utilities.dates 
+    FROM utilities.dates
     LEFT JOIN utilities.currency USING(date)
     WHERE date <= current_date),
     {%- endif -%}
 
     {%- set exchange_rate = 1 if var('currency') == 'USD' else 'exchange_rate' %}
 
-    insights AS 
-    (SELECT 
+    insights AS
+    (SELECT
         {%- for field in stg_fields -%}
         {%- if field in currency_fields or '_value' in field %}
         "{{ field }}"::float/{{ exchange_rate }} as "{{ field }}"
@@ -71,9 +90,12 @@ WITH
     {%- if var('currency') != 'USD' %}
     LEFT JOIN currency USING(date)
     {%- endif %}
+    {% if is_incremental() -%}
+    where date >= date_trunc('year', (select dateadd(day,-{{ var('googleads_lookback_days', 31) }},max(date)) from {{ this }}))::date
+    {%- endif %}
     ),
 
-    insights_stg AS 
+    insights_stg AS
     (SELECT *,
     {{ get_date_parts('date') }}
     FROM insights),
@@ -88,13 +110,13 @@ WITH
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'campaigns' -%}
 
-    campaigns_staging AS 
-    (SELECT 
+    campaigns_staging AS
+    (SELECT
         {% for field in selected_fields|reject("eq","updated_at") -%}
         {{ get_googleads_clean_field(table_name, field) }}
         {%- if not loop.last %},{%- endif %}
         {% endfor -%}
-    FROM 
+    FROM
         (SELECT
             {{ selected_fields|join(", ") }},
             MAX(updated_at) OVER (PARTITION BY id) as last_updated_at
@@ -110,13 +132,13 @@ WITH
 ] -%}
 {%- set schema_name, table_name = 'googleads_raw', 'accounts' -%}
 
-    accounts_staging AS 
-    (SELECT 
+    accounts_staging AS
+    (SELECT
         {% for field in selected_fields|reject("eq","updated_at") -%}
         {{ get_googleads_clean_field(table_name, field) }}
         {%- if not loop.last %},{%- endif %}
         {% endfor -%}
-    FROM 
+    FROM
         (SELECT
             {{ selected_fields|join(", ") }},
             MAX(updated_at) OVER (PARTITION BY id) as last_updated_at
@@ -125,19 +147,18 @@ WITH
     ),
 
 {%- set date_granularity_list = ['day','week','month','quarter','year'] -%}
-{%- set exclude_fields = ['date','day','week','month','quarter','year','last_updated','unique_key','end_date_time','start_date_time'] -%}
+{%- set measure_exclude = ['date','day','week','month','quarter','year','last_updated','unique_key','end_date_time','start_date_time'] -%}
 {%- set dimensions = ['campaign_id'] -%}
-{%- set measures = adapter.get_columns_in_relation(ref('googleads_campaigns_insights'))
-                    |map(attribute="name")
-                    |reject("in",exclude_fields)
+{%- set measures = stg_fields
+                    |reject("in",measure_exclude)
                     |reject("in",dimensions)
                     |list
-                    -%}  
- 
+                    -%}
+
     {%- for date_granularity in date_granularity_list %}
 
-    performance_{{date_granularity}} AS 
-    (SELECT 
+    performance_{{date_granularity}} AS
+    (SELECT
         '{{date_granularity}}' as date_granularity,
         {{date_granularity}} as date,
         {%- for dimension in dimensions %}
@@ -152,12 +173,12 @@ WITH
     ),
     {%- endfor %}
 
-    campaigns AS 
+    campaigns AS
     (SELECT account_id, campaign_id, campaign_name, campaign_status, advertising_channel_type
     FROM campaigns_staging
     ),
 
-    accounts AS 
+    accounts AS
     (SELECT account_id, account_name, account_currency_code
     FROM accounts_staging
     )
@@ -165,7 +186,7 @@ WITH
 SELECT *,
     {{ get_googleads_default_campaign_types('campaign_name')}},
     date||'_'||date_granularity||'_'||campaign_id as unique_key
-FROM 
+FROM
     ({% for date_granularity in date_granularity_list -%}
     SELECT *
     FROM performance_{{date_granularity}}

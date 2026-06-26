@@ -32,6 +32,7 @@ vars:
 
     # Googleads vars
     googleads_conversion_used_by_custom_conversions: 'all_conversions'   # Googleads custom conversions can use conversions or all_conversions
+    googleads_lookback_days: 31   # incremental reprocessing window; covers the 30-day conversion lookback + 1 day buffer
 
 models:
   bolt_dbt_googleads_package:
@@ -39,15 +40,66 @@ models:
     base:
       +schema: googleads_base
       +materialized: table
-      
-      _stg_googleads_shopping_insights:
-        +enabled: false
-      googleads_shopping_insights:
-        +enabled: false
+
+      # ---------------------------------------------------------------
+      # Redundant "currency + date parts" middle tables.
+      # The reporting models now read the _stg_*_insights day-grain models
+      # directly, so these are no longer needed.
+      # ---------------------------------------------------------------
+      googleads_campaigns_insights:         {+enabled: false}
+      googleads_ad_groups_insights:         {+enabled: false}
+      googleads_asset_groups_insights:      {+enabled: false}
+      googleads_ads_insights:               {+enabled: false}
+      googleads_keywords_insights:          {+enabled: false}
+      googleads_searchterms_insights:       {+enabled: false}
+      googleads_geo_insights:               {+enabled: false}
+      googleads_campaign_products_insights: {+enabled: false}
+      _stg_googleads_shopping_insights:     {+enabled: false}
+      googleads_shopping_insights:          {+enabled: false}
+
+      # ---------------------------------------------------------------
+      # Standalone metadata base models. Campaign/ad-group/asset-group
+      # metadata is now built inline inside the reporting models, so these
+      # do not need to run.
+      # ---------------------------------------------------------------
+      googleads_accounts:          {+enabled: false}
+      googleads_campaigns:         {+enabled: false}
+      googleads_ad_groups:         {+enabled: false}
+      googleads_asset_groups:      {+enabled: false}
+      googleads_ads:               {+enabled: false}
+      googleads_keywords:          {+enabled: false}
+      googleads_shopping_products: {+enabled: false}
+
+      # ---------------------------------------------------------------
+      # Optional entities: ad / keyword / searchterm.
+      # Kept in the package (and synced by Fivetran) but off by default.
+      # Enable per-client by overriding +enabled: true.
+      # ---------------------------------------------------------------
+      _stg_googleads_ads_insights:         {+enabled: false}
+      _stg_googleads_keywords_insights:    {+enabled: false}
+      _stg_googleads_searchterms_insights: {+enabled: false}
+
+      # ---------------------------------------------------------------
+      # Dropped entities: geo / campaign_product / shopping.
+      # Removed from the Fivetran sync as well.
+      # ---------------------------------------------------------------
+      _stg_googleads_geo_insights:               {+enabled: false}
+      _stg_googleads_campaign_products_insights: {+enabled: false}
 
     reporting:
       +schema: reporting
       +materialized: table
 
-      googleads_performance_by_shopping_product:
-        +enabled: false
+      # --- optional entities (off by default) ---
+      googleads_performance_by_ad:         {+enabled: false}
+      googleads_performance_by_ad_legacy:  {+enabled: false}
+      googleads_performance_by_keyword:    {+enabled: false}
+      googleads_performance_by_searchterm: {+enabled: false}
+
+      # --- legacy duplicate of the campaign model ---
+      googleads_performance_by_campaign_legacy: {+enabled: false}
+
+      # --- dropped entities ---
+      googleads_performance_by_geo:              {+enabled: false}
+      googleads_performance_by_campaign_product: {+enabled: false}
+      googleads_performance_by_shopping_product: {+enabled: false}
