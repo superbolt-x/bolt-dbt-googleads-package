@@ -80,7 +80,8 @@
 {%- set stg_fields = adapter.get_columns_in_relation(ref('_stg_googleads_ads_insights'))
                     |map(attribute="name")
                     |reject("in",exclude_fields)
-                    -%}  
+                    |list
+                    -%}
 
 WITH 
     {% if var('currency') != 'USD' -%}
