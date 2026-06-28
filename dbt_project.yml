@@ -34,11 +34,6 @@ vars:
     googleads_conversion_used_by_custom_conversions: 'all_conversions'   # Googleads custom conversions can use conversions or all_conversions
     googleads_lookback_days: 31   # incremental reprocessing window; covers the 30-day conversion lookback + 1 day buffer
 
-    # Optional streams — off by default. Flip to true per-client (e.g. Erie) to
-    # build the (incremental) keyword / searchterm pipelines.
-    googleads_enable_keyword: false
-    googleads_enable_searchterm: false
-
 models:
   bolt_dbt_googleads_package:
     # Config indicated by + and applies to all files under models/example/
@@ -46,67 +41,14 @@ models:
       +schema: googleads_base
       +materialized: table
 
-      # ---------------------------------------------------------------
-      # Redundant "currency + date parts" middle tables.
-      # The reporting models now read the _stg_*_insights day-grain models
-      # directly, so these are no longer needed.
-      # ---------------------------------------------------------------
-      googleads_campaigns_insights:         {+enabled: false}
-      googleads_ad_groups_insights:         {+enabled: false}
-      googleads_asset_groups_insights:      {+enabled: false}
-      googleads_ads_insights:               {+enabled: false}
-      googleads_keywords_insights:          {+enabled: false}
-      googleads_searchterms_insights:       {+enabled: false}
-      googleads_geo_insights:               {+enabled: false}
-      googleads_campaign_products_insights: {+enabled: false}
-      _stg_googleads_shopping_insights:     {+enabled: false}
-      googleads_shopping_insights:          {+enabled: false}
-
-      # ---------------------------------------------------------------
-      # Standalone metadata base models. Campaign/ad-group/asset-group
-      # metadata is now built inline inside the reporting models, so these
-      # do not need to run.
-      # ---------------------------------------------------------------
-      googleads_accounts:          {+enabled: false}
-      googleads_campaigns:         {+enabled: false}
-      googleads_ad_groups:         {+enabled: false}
-      googleads_asset_groups:      {+enabled: false}
-      googleads_ads:               {+enabled: false}
-      googleads_keywords:          {+enabled: false}
-      googleads_shopping_products: {+enabled: false}
-
-      # ---------------------------------------------------------------
-      # Optional entities: ad / keyword / searchterm.
-      # Kept in the package (and synced by Fivetran) but off by default.
-      # keyword / searchterm are refactored to the slim+incremental pattern and
-      # gated by a var. ad is not yet refactored — enable explicitly if needed
-      # (it still depends on its middle/base-metadata models).
-      # ---------------------------------------------------------------
-      _stg_googleads_ads_insights:         {+enabled: false}
-      _stg_googleads_keywords_insights:    {+enabled: "{{ var('googleads_enable_keyword', false) }}"}
-      _stg_googleads_searchterms_insights: {+enabled: "{{ var('googleads_enable_searchterm', false) }}"}
-
-      # ---------------------------------------------------------------
-      # Dropped entities: geo / campaign_product / shopping.
-      # Removed from the Fivetran sync as well.
-      # ---------------------------------------------------------------
-      _stg_googleads_geo_insights:               {+enabled: false}
-      _stg_googleads_campaign_products_insights: {+enabled: false}
+      _stg_googleads_shopping_insights:
+        +enabled: false
+      googleads_shopping_insights:
+        +enabled: false
 
     reporting:
       +schema: reporting
       +materialized: table
 
-      # --- optional entities (off by default; keyword/searchterm var-gated) ---
-      googleads_performance_by_ad:         {+enabled: false}
-      googleads_performance_by_ad_legacy:  {+enabled: false}
-      googleads_performance_by_keyword:    {+enabled: "{{ var('googleads_enable_keyword', false) }}"}
-      googleads_performance_by_searchterm: {+enabled: "{{ var('googleads_enable_searchterm', false) }}"}
-
-      # --- legacy duplicate of the campaign model ---
-      googleads_performance_by_campaign_legacy: {+enabled: false}
-
-      # --- dropped entities ---
-      googleads_performance_by_geo:              {+enabled: false}
-      googleads_performance_by_campaign_product: {+enabled: false}
-      googleads_performance_by_shopping_product: {+enabled: false}
+      googleads_performance_by_shopping_product:
+        +enabled: false
