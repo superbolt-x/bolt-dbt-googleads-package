@@ -74,6 +74,6 @@ LEFT JOIN convtype USING(date, keyword_ad_group_criterion, search_term, search_t
 {%- endif %}
 {% if is_incremental() -%}
 
-where date >= (select max(date)-30 from {{ this }})
+where date >= (select max(date) - {{ var('googleads_lookback_days', 31) }} from {{ this }})
 
 {% endif %}

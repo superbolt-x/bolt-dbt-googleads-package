@@ -32,6 +32,7 @@ vars:
 
     # Googleads vars
     googleads_conversion_used_by_custom_conversions: 'all_conversions'   # Googleads custom conversions can use conversions or all_conversions
+    googleads_lookback_days: 31   # incremental reprocessing window; covers the 30-day conversion lookback + 1 day buffer
 
 models:
   bolt_dbt_googleads_package:
@@ -39,7 +40,7 @@ models:
     base:
       +schema: googleads_base
       +materialized: table
-      
+
       _stg_googleads_shopping_insights:
         +enabled: false
       googleads_shopping_insights:
