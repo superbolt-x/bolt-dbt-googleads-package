@@ -239,7 +239,7 @@ WITH
 
 SELECT *,
     {{ get_googleads_default_campaign_types('campaign_name')}},
-    date||'_'||date_granularity||'_'||keyword_ad_group_criterion||'_'||search_term||'_'||search_term_match_type as unique_key
+    date||'_'||date_granularity||'_'||coalesce(keyword_ad_group_criterion::varchar,'none')||'_'||coalesce(search_term::varchar,'none')||'_'||coalesce(search_term_match_type::varchar,'none') as unique_key
 FROM
     ({% for date_granularity in date_granularity_list -%}
     SELECT *
