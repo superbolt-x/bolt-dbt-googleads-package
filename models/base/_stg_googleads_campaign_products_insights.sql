@@ -71,9 +71,8 @@ WITH insights AS
     )
     {%- endif %}
 
-SELECT *,
-    MAX(_fivetran_synced) over (PARTITION BY account_id) as last_updated,
-    campaign_id||'_'||product_item_id||'_'||product_title||'_'||date as unique_key
+, insights_joined AS (
+SELECT *
 FROM insights
 {%- if convtype_table_exists %}
 LEFT JOIN convtype USING(date, campaign_id,product_item_id,product_title)
@@ -83,3 +82,19 @@ LEFT JOIN convtype USING(date, campaign_id,product_item_id,product_title)
 where date >= (select max(date)-30 from {{ this }})
 
 {% endif %}
+)
+
+-- last_updated is a per-account aggregate joined back instead of MAX() OVER (PARTITION BY account_id): the window
+-- redistributed every row by account_id and the table inherited KEY(account_id) (skew 100 with one account).
+-- It reads insights_joined, which carries the incremental filter, so it covers the same rows the window did.
+, last_updated_source AS (
+SELECT account_id, MAX(_fivetran_synced) as last_updated
+FROM insights_joined
+GROUP BY 1
+)
+
+SELECT insights_joined.*,
+    last_updated_source.last_updated,
+    campaign_id||'_'||product_item_id||'_'||product_title||'_'||date as unique_key
+FROM insights_joined
+LEFT JOIN last_updated_source ON insights_joined.account_id = last_updated_source.account_id
